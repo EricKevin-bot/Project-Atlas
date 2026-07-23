@@ -1,0 +1,16 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+
+# Generated output
+output/
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment variables
+.env
