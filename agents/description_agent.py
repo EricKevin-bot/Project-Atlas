@@ -2,10 +2,10 @@ from models.master_content import MasterContent
 
 
 class DescriptionAgent:
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = "Description Agent"
 
-    def run(self, content: MasterContent):
+    def run(self, content: MasterContent) -> None:
         print()
         print("📝 Description Agent")
         print(f"Creating description for: {content.topic}")
