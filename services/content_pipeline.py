@@ -1,47 +1,63 @@
 from agents.research_agent import ResearchAgent
-from agents.script_agent import ScriptAgent
 from agents.title_agent import TitleAgent
-from utils.file_manager import FileManager
+from agents.script_agent import ScriptAgent
+from agents.description_agent import DescriptionAgent
+from agents.tags_agent import TagsAgent
+from services.file_manager import FileManager
 
 
 class ContentPipeline:
-    def __init__(self):
+    def __init__(self) -> None:
         self.research_agent = ResearchAgent()
-        self.script_agent = ScriptAgent()
         self.title_agent = TitleAgent()
+        self.script_agent = ScriptAgent()
+        self.description_agent = DescriptionAgent()
+        self.tags_agent = TagsAgent()
         self.file_manager = FileManager()
 
-    def run(self):
+    def run(self) -> None:
+        print("\n🚀 Starting Content Pipeline...\n")
+
         content = self.research_agent.find_video_idea()
 
-        print()
-        print("📋 CEO Decision")
-        print(f"Proposed video: {content.topic}")
+        print(f"\n💡 Proposed Topic: {content.topic}")
+        print(f"🎯 Audience: {content.audience}")
+        print(f"📌 Objective: {content.objective}")
 
-        decision = input("Approve this video? (y/n): ")
+        approval = input("\nApprove this topic? (y/n): ").strip().lower()
 
-        if decision.lower() != "y":
-            print("❌ Rejected")
+        if approval != "y":
+            print("\n❌ Content rejected.")
             return
 
-        print(f"✅ Approved: {content.topic}")
+        agents = [
+            self.title_agent,
+            self.script_agent,
+            self.description_agent,
+            self.tags_agent,
+        ]
 
-        script = self.script_agent.write_script(content)
+        for agent in agents:
+            agent.run(content)
 
-        print()
-        print("📄 Generated Script")
-        print(script)
+        self._display_content_package(content)
 
-        title = self.title_agent.create_title(content)
-
-        print()
-        print("🏷️ Generated Title")
-        print(title)
-
-        file_path = self.file_manager.save_content(
-            title=title,
-            script=script,
+        self.file_manager.save_content(
+            title=content.title,
+            script=content.script,
+            description=content.description,
+            tags=content.tags,
         )
 
-        print()
-        print(f"💾 Script saved to: {file_path}")
+        print("\n✅ Pipeline complete.")
+
+    @staticmethod
+    def _display_content_package(content) -> None:
+        print("\n" + "=" * 40)
+        print("📦 CONTENT PACKAGE")
+        print("=" * 40)
+
+        print(f"\n🎬 TITLE\n{content.title}")
+        print(f"\n📝 DESCRIPTION\n{content.description}")
+        print(f"\n🏷️ TAGS\n{', '.join(content.tags)}")
+        print(f"\n📄 SCRIPT\n{content.script}")

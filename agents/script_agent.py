@@ -1,23 +1,31 @@
 from models.master_content import MasterContent
-from services.ai_provider import AIProvider
 
 
 class ScriptAgent:
     def __init__(self):
         self.name = "Script Agent"
-        self.ai = AIProvider()
 
-    def write_script(self, content: MasterContent) -> str:
+    def run(self, content: MasterContent):
         print()
-        print("✍️ Script Agent")
+        print("📄 Script Agent")
         print(f"Writing script for: {content.topic}")
 
-        script = self.ai.generate_script(
-            video_idea=content.topic,
-            audience=content.audience,
-            objective=content.objective,
-            key_points=content.key_points,
-            call_to_action=content.call_to_action,
-        )
+        script = f"""
+Welcome back!
 
-        return script
+Today we're talking about {content.topic}.
+
+Here's what you'll learn:
+
+"""
+
+        for point in content.key_points:
+            script += f"\n- {point}"
+
+        script += f"""
+
+If you enjoyed this video,
+{content.call_to_action}
+"""
+
+        content.script = script.strip()

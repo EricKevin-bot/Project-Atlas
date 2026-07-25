@@ -1,17 +1,15 @@
-from dataclasses import dataclass
+import os
+
+from dotenv import load_dotenv
 
 
-@dataclass
+load_dotenv()
+
+
 class Config:
-    PROJECT_NAME = "Project Atlas"
-
-    OUTPUT_FOLDER = "output"
-
-    AI_PROVIDER = "mock"
-
-    MODEL = "claude-sonnet"
-
-    DEBUG = True
+    AI_PROVIDER = os.getenv("AI_PROVIDER", "mock")
+    MODEL = os.getenv("MODEL", "claude-sonnet-5")
+    ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
 
 config = Config()

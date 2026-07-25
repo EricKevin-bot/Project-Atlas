@@ -5,9 +5,9 @@ class TitleAgent:
     def __init__(self):
         self.name = "Title Agent"
 
-    def create_title(self, content: MasterContent):
+    def run(self, content: MasterContent):
         print()
         print("🏷️ Title Agent")
         print(f"Creating title for: {content.topic}")
 
-        return f"{content.topic}: The Truth Nobody Tells You"
+        content.title = f"How to Master {content.topic} in 2026"
