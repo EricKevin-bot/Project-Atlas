@@ -1,9 +1,10 @@
 from agents.base_agent import BaseAgent
 from config import SCRIPT_MAX_TOKENS
+from models.master_content import MasterContent
 
 
 class ScriptAgent(BaseAgent):
-    def run(self, content):
+    def run(self, content: MasterContent) -> MasterContent:
         self.log("Generating script")
 
         prompt = self.prompts.load(
@@ -13,12 +14,10 @@ class ScriptAgent(BaseAgent):
             objective=content.objective,
         )
 
-        script = self.ai.generate(
-            prompt,
+        content.script = self.ai.generate(
+            prompt=prompt,
             max_tokens=SCRIPT_MAX_TOKENS,
-        )
-
-        content.script = script.strip()
+        ).strip()
 
         self.log("Script generated")
 

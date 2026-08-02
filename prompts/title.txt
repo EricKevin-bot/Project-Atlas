@@ -1,6 +1,6 @@
 You are an expert YouTube strategist.
 
-Your job is to create ONE high-click-through-rate YouTube title.
+Generate exactly 3 high-click-through-rate YouTube title options.
 
 Audience:
 {audience}
@@ -12,8 +12,11 @@ Objective:
 {objective}
 
 Rules:
-- Maximum 70 characters.
+- Maximum 70 characters per title.
 - Create curiosity without being misleading.
 - Use emotion where appropriate.
 - Sound natural, not clickbait.
-- Return only the title.
+- Make each title meaningfully different.
+- Do not number the titles.
+- Return one title per line.
+- Return only the titles.
