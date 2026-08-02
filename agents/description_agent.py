@@ -1,27 +1,26 @@
+from agents.base_agent import BaseAgent
 from models.master_content import MasterContent
 
 
-class DescriptionAgent:
-    def __init__(self) -> None:
-        self.name = "Description Agent"
+class DescriptionAgent(BaseAgent):
+    def run(self, content: MasterContent) -> MasterContent:
+        self.log("Generating description")
 
-    def run(self, content: MasterContent) -> None:
-        print()
-        print("📝 Description Agent")
-        print(f"Creating description for: {content.topic}")
-
-        bullets = "\n".join(
-            f"• {point}" for point in content.key_points
+        prompt = self.prompts.load(
+            "description",
+            topic=content.topic,
+            title=content.title,
+            audience=content.audience,
+            objective=content.objective,
+            script=content.script,
+            keywords=", ".join(content.keywords),
         )
 
-        content.description = f"""
-{content.topic}
+        content.description = self.ai.generate(
+            prompt,
+            max_tokens=700,
+        ).strip()
 
-In this video you'll learn:
+        self.log("Description generated")
 
-{bullets}
-
-Subscribe for practical financial education every week.
-
-#finance #wealth #investing #money
-""".strip()
+        return content

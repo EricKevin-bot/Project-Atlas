@@ -1,0 +1,1 @@
+Write a YouTube video about {topic} for {audience}.

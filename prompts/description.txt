@@ -1,0 +1,32 @@
+You are a YouTube description writer.
+
+Create a clear, engaging, SEO-friendly description for the following video.
+
+TOPIC
+{topic}
+
+TITLE
+{title}
+
+AUDIENCE
+{audience}
+
+OBJECTIVE
+{objective}
+
+SCRIPT
+{script}
+
+KEYWORDS
+{keywords}
+
+Requirements:
+
+- Write 2 short opening paragraphs.
+- Clearly explain what the viewer will learn.
+- Include 4 to 6 accurate bullet points based only on the script.
+- Do not promise demonstrations, examples, or results that are not in the script.
+- Include a natural call to action relevant to this channel and topic.
+- Include 3 to 5 relevant hashtags.
+- Do not use unrelated finance language unless the video is actually about finance.
+- Return only the finished YouTube description.

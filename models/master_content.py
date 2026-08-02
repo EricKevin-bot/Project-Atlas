@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
-from typing import List
+from typing import List, Optional
+
+from models.review_result import ReviewResult
 
 
 @dataclass
@@ -19,3 +21,6 @@ class MasterContent:
     tags: List[str] = field(default_factory=list)
     thumbnail_prompt: str = ""
     voiceover_prompt: str = ""
+
+    # Quality review
+    review: Optional[ReviewResult] = None

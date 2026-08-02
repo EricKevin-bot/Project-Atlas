@@ -1,25 +1,30 @@
+from agents.base_agent import BaseAgent
 from models.master_content import MasterContent
 
 
-class TagsAgent:
-    def __init__(self):
-        self.name = "Tags Agent"
+class TagsAgent(BaseAgent):
+    def run(self, content: MasterContent) -> MasterContent:
+        self.log("Generating SEO tags")
 
-    def run(self, content: MasterContent):
-        print()
-        print("🏷️ Tags Agent")
-        print(f"Generating tags for: {content.topic}")
+        prompt = self.prompts.load(
+            "tags",
+            topic=content.topic,
+            title=content.title,
+            script=content.script,
+            keywords=", ".join(content.keywords),
+        )
 
-        tags = [
-            content.topic.lower(),
-            "finance",
-            "investing",
-            "wealth",
-            "money",
-            "financial freedom",
-            "personal finance",
-            "success"
+        response = self.ai.generate(
+            prompt,
+            max_tokens=300,
+        )
+
+        content.tags = [
+            line.strip()
+            for line in response.splitlines()
+            if line.strip()
         ]
 
-        # Remove duplicates while preserving order
-        content.tags = list(dict.fromkeys(tags))
+        self.log(f"Generated {len(content.tags)} tags")
+
+        return content

@@ -1,31 +1,25 @@
-from models.master_content import MasterContent
+from agents.base_agent import BaseAgent
+from config import SCRIPT_MAX_TOKENS
 
 
-class ScriptAgent:
-    def __init__(self):
-        self.name = "Script Agent"
+class ScriptAgent(BaseAgent):
+    def run(self, content):
+        self.log("Generating script")
 
-    def run(self, content: MasterContent):
-        print()
-        print("📄 Script Agent")
-        print(f"Writing script for: {content.topic}")
+        prompt = self.prompts.load(
+            "script",
+            topic=content.topic,
+            audience=content.audience,
+            objective=content.objective,
+        )
 
-        script = f"""
-Welcome back!
-
-Today we're talking about {content.topic}.
-
-Here's what you'll learn:
-
-"""
-
-        for point in content.key_points:
-            script += f"\n- {point}"
-
-        script += f"""
-
-If you enjoyed this video,
-{content.call_to_action}
-"""
+        script = self.ai.generate(
+            prompt,
+            max_tokens=SCRIPT_MAX_TOKENS,
+        )
 
         content.script = script.strip()
+
+        self.log("Script generated")
+
+        return content

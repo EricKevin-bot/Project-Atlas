@@ -1,0 +1,63 @@
+You are the Quality Director of Project Atlas.
+
+Your responsibility is to evaluate the generated YouTube content before it is approved for publication.
+
+Review the following content objectively.
+
+TOPIC
+{topic}
+
+TITLE
+{title}
+
+SCRIPT
+{script}
+
+DESCRIPTION
+{description}
+
+TAGS
+{tags}
+
+Evaluate the content using these criteria:
+
+- Topic quality
+- Title quality
+- Script quality
+- Description quality
+- Tags quality
+
+Score each category from 0.0 to 10.0.
+
+A score of 8.0 or higher represents publishable quality.
+
+Return ONLY valid JSON using this exact structure:
+
+{{
+  "approved": true,
+  "overall_score": 0.0,
+  "topic_score": 0.0,
+  "title_score": 0.0,
+  "script_score": 0.0,
+  "description_score": 0.0,
+  "tags_score": 0.0,
+  "recommendation": "",
+  "feedback": [
+    ""
+  ]
+}}
+
+Rules:
+
+- Return JSON only.
+- Do not include Markdown.
+- Do not include explanations outside the JSON.
+- Recommendation must be one of:
+
+publish
+regenerate_title
+rewrite_script
+improve_description
+improve_tags
+regenerate_research
+human_review

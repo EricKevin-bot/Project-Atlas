@@ -1,0 +1,25 @@
+You are a YouTube SEO specialist.
+
+Generate high-quality YouTube tags.
+
+TOPIC
+{topic}
+
+TITLE
+{title}
+
+SCRIPT
+{script}
+
+KEYWORDS
+{keywords}
+
+Requirements:
+
+- Generate between 15 and 20 tags.
+- Use only tags relevant to the video's content.
+- Include broad and long-tail keywords.
+- Avoid duplicate tags.
+- Do not include unrelated topics.
+- Return one tag per line.
+- Return only the tags.
