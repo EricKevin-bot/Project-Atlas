@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import Optional, Tuple
+
 from agents.description_agent import DescriptionAgent
 from agents.quality_agent import QualityAgent
 from agents.research_agent import ResearchAgent
@@ -6,6 +9,9 @@ from agents.tags_agent import TagsAgent
 from agents.title_agent import TitleAgent
 from models.master_content import MasterContent
 from services.file_manager import FileManager
+
+
+PipelineResult = Tuple[MasterContent, Optional[Path], str]
 
 
 class ContentPipeline:
@@ -18,7 +24,7 @@ class ContentPipeline:
         self.quality_agent = QualityAgent()
         self.file_manager = FileManager()
 
-    def run(self) -> None:
+    def run(self) -> PipelineResult:
         print("\n🚀 Starting Content Pipeline...\n")
 
         content = MasterContent(
@@ -35,11 +41,13 @@ class ContentPipeline:
         print(f"🎯 Audience: {content.audience}")
         print(f"📌 Objective: {content.objective}")
 
-        approval = input("\nApprove this topic? (y/n): ").strip().lower()
+        approval = input(
+            "\nApprove this topic? (y/n): "
+        ).strip().lower()
 
         if approval != "y":
             print("\n❌ Content rejected.")
-            return
+            return content, None, "TOPIC_REJECTED"
 
         production_agents = [
             self.title_agent,
@@ -58,11 +66,15 @@ class ContentPipeline:
 
         if not content.review.approved:
             print("\n❌ Quality review rejected this content package.")
-            print(f"Recommendation: {content.review.recommendation}")
+            print(
+                f"Recommendation: "
+                f"{content.review.recommendation}"
+            )
             print("The file will not be exported yet.")
-            return
 
-        self.file_manager.save_content(
+            return content, None, "QUALITY_REJECTED"
+
+        output_path = self.file_manager.save_content(
             title=content.title,
             script=content.script,
             description=content.description,
@@ -71,8 +83,12 @@ class ContentPipeline:
 
         print("\n✅ Pipeline complete.")
 
+        return content, output_path, "SUCCESS"
+
     @staticmethod
-    def _display_content_package(content: MasterContent) -> None:
+    def _display_content_package(
+        content: MasterContent,
+    ) -> None:
         print("\n" + "=" * 40)
         print("📦 CONTENT PACKAGE")
         print("=" * 40)
@@ -83,7 +99,9 @@ class ContentPipeline:
         print(f"\n📄 SCRIPT\n{content.script}")
 
     @staticmethod
-    def _display_quality_report(content: MasterContent) -> None:
+    def _display_quality_report(
+        content: MasterContent,
+    ) -> None:
         if content.review is None:
             print("\n⚠️ No quality review available.")
             return
