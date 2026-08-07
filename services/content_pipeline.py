@@ -7,8 +7,10 @@ from agents.research_agent import ResearchAgent
 from agents.script_agent import ScriptAgent
 from agents.tags_agent import TagsAgent
 from agents.title_agent import TitleAgent
+from config import MAX_RETRIES, RETRY_FAILED_AGENTS
 from models.master_content import MasterContent
 from services.file_manager import FileManager
+from services.retry_manager import RetryManager
 
 
 PipelineResult = Tuple[MasterContent, Optional[Path], str]
@@ -23,6 +25,7 @@ class ContentPipeline:
         self.tags_agent = TagsAgent()
         self.quality_agent = QualityAgent()
         self.file_manager = FileManager()
+        self.retry_manager = RetryManager()
 
     def run(self) -> PipelineResult:
         print("\n🚀 Starting Content Pipeline...\n")
@@ -35,6 +38,7 @@ class ContentPipeline:
             call_to_action="",
         )
 
+        # Research
         self.research_agent.run(content)
 
         print(f"\n💡 Proposed Topic: {content.topic}")
@@ -49,6 +53,7 @@ class ContentPipeline:
             print("\n❌ Content rejected.")
             return content, None, "TOPIC_REJECTED"
 
+        # Production
         production_agents = [
             self.title_agent,
             self.script_agent,
@@ -59,21 +64,60 @@ class ContentPipeline:
         for agent in production_agents:
             agent.run(content)
 
+        # Initial quality review
         content.review = self.quality_agent.run(content)
 
         self._display_content_package(content)
         self._display_quality_report(content)
 
+        # Targeted retry system
+        retry_count = 0
+
+        while (
+            not content.review.approved
+            and RETRY_FAILED_AGENTS
+            and retry_count < MAX_RETRIES
+        ):
+            retry_count += 1
+
+            print("\n" + "=" * 40)
+            print(f"🔄 TARGETED RETRY {retry_count}/{MAX_RETRIES}")
+            print("=" * 40)
+
+            previous_recommendation = content.review.recommendation
+
+            print(
+                f"Quality Agent recommendation: "
+                f"{previous_recommendation}"
+            )
+
+            content = self.retry_manager.retry(
+                review=content.review,
+                content=content,
+                pipeline=self,
+            )
+
+            self._display_quality_report(content)
+
+        # Final quality gate
         if not content.review.approved:
             print("\n❌ Quality review rejected this content package.")
             print(
                 f"Recommendation: "
                 f"{content.review.recommendation}"
             )
+
+            if retry_count >= MAX_RETRIES and MAX_RETRIES > 0:
+                print(
+                    f"Retry limit reached ({MAX_RETRIES}). "
+                    "Human review required."
+                )
+
             print("The file will not be exported yet.")
 
             return content, None, "QUALITY_REJECTED"
 
+        # Export approved package
         output_path = self.file_manager.save_content(
             title=content.title,
             script=content.script,
@@ -82,6 +126,11 @@ class ContentPipeline:
         )
 
         print("\n✅ Pipeline complete.")
+
+        if retry_count:
+            print(
+                f"🔄 Approved after {retry_count} targeted retry."
+            )
 
         return content, output_path, "SUCCESS"
 

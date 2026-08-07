@@ -2,34 +2,53 @@
 Project Atlas configuration.
 """
 
+# ==========================================
 # Application
-ATLAS_VERSION = "0.6.1"
-APP_NAME = "Project Atlas"
+# ==========================================
 
-# Runtime mode
+APP_NAME = "Project Atlas"
+ATLAS_VERSION = "0.7.0"
+
+# ==========================================
+# Runtime
+# ==========================================
+
 DEVELOPMENT_MODE = True
 DEBUG_MODE = True
 LOGGING_ENABLED = True
 
-# AI provider
+# ==========================================
+# AI Provider
+# ==========================================
+
 AI_PROVIDER = "anthropic"
 CLAUDE_MODEL = "claude-sonnet-4-6"
 
-# Token limits
+# ==========================================
+# Token Limits
+# ==========================================
+
+RESEARCH_MAX_TOKENS = 1200
 TITLE_MAX_TOKENS = 500
 SCRIPT_MAX_TOKENS = 2500
 DESCRIPTION_MAX_TOKENS = 700
 TAGS_MAX_TOKENS = 300
 QUALITY_MAX_TOKENS = 800
-RESEARCH_MAX_TOKENS = 1200
 
-# Budget controls
-MAX_RETRIES = 0
-RETRY_FAILED_AGENTS = False
+# ==========================================
+# Budget Controls
+# ==========================================
+
+MAX_RETRIES = 1
+RETRY_FAILED_AGENTS = True
+
 GENERATE_MULTIPLE_TITLES = True
 TITLE_CANDIDATE_LIMIT = 3
 
-# Quality thresholds
+# ==========================================
+# Quality Thresholds
+# ==========================================
+
 MIN_OVERALL_SCORE = 8.0
 MIN_TITLE_SCORE = 8.0
 MIN_SCRIPT_SCORE = 8.0
