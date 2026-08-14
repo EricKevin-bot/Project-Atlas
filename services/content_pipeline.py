@@ -2,13 +2,13 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 from agents.description_agent import DescriptionAgent
-from agents.quality_agent import QualityAgent
 from agents.research_agent import ResearchAgent
 from agents.script_agent import ScriptAgent
 from agents.tags_agent import TagsAgent
 from agents.title_agent import TitleAgent
 from config import MAX_RETRIES, RETRY_FAILED_AGENTS
 from models.master_content import MasterContent
+from services.editorial_board import EditorialBoard
 from services.file_manager import FileManager
 from services.retry_manager import RetryManager
 
@@ -23,7 +23,9 @@ class ContentPipeline:
         self.script_agent = ScriptAgent()
         self.description_agent = DescriptionAgent()
         self.tags_agent = TagsAgent()
-        self.quality_agent = QualityAgent()
+
+        self.editorial_board = EditorialBoard()
+
         self.file_manager = FileManager()
         self.retry_manager = RetryManager()
 
@@ -64,11 +66,11 @@ class ContentPipeline:
         for agent in production_agents:
             agent.run(content)
 
-        # Initial quality review
-        content.review = self.quality_agent.run(content)
+        # Initial editorial review
+        content.review = self.editorial_board.review(content)
 
         self._display_content_package(content)
-        self._display_quality_report(content)
+        self._display_editorial_report(content)
 
         # Targeted retry system
         retry_count = 0
@@ -84,11 +86,9 @@ class ContentPipeline:
             print(f"🔄 TARGETED RETRY {retry_count}/{MAX_RETRIES}")
             print("=" * 40)
 
-            previous_recommendation = content.review.recommendation
-
             print(
-                f"Quality Agent recommendation: "
-                f"{previous_recommendation}"
+                f"Editorial Board recommendation: "
+                f"{content.review.recommendation}"
             )
 
             content = self.retry_manager.retry(
@@ -97,11 +97,11 @@ class ContentPipeline:
                 pipeline=self,
             )
 
-            self._display_quality_report(content)
+            self._display_editorial_report(content)
 
-        # Final quality gate
+        # Final editorial gate
         if not content.review.approved:
-            print("\n❌ Quality review rejected this content package.")
+            print("\n❌ Editorial Board rejected this content package.")
             print(
                 f"Recommendation: "
                 f"{content.review.recommendation}"
@@ -115,7 +115,7 @@ class ContentPipeline:
 
             print("The file will not be exported yet.")
 
-            return content, None, "QUALITY_REJECTED"
+            return content, None, "EDITORIAL_REJECTED"
 
         # Export approved package
         output_path = self.file_manager.save_content(
@@ -148,33 +148,37 @@ class ContentPipeline:
         print(f"\n📄 SCRIPT\n{content.script}")
 
     @staticmethod
-    def _display_quality_report(
+    def _display_editorial_report(
         content: MasterContent,
     ) -> None:
         if content.review is None:
-            print("\n⚠️ No quality review available.")
+            print("\n⚠️ No editorial review available.")
             return
 
         review = content.review
 
         print("\n" + "=" * 40)
-        print("🧪 QUALITY REPORT")
+        print("🧪 EDITORIAL BOARD REPORT")
         print("=" * 40)
 
         print(f"\nApproved: {'Yes' if review.approved else 'No'}")
         print(f"Overall score: {review.overall_score:.1f}/10")
-        print(f"Topic score: {review.topic_score:.1f}/10")
-        print(f"Title score: {review.title_score:.1f}/10")
-        print(f"Script score: {review.script_score:.1f}/10")
-        print(
-            f"Description score: "
-            f"{review.description_score:.1f}/10"
-        )
-        print(f"Tags score: {review.tags_score:.1f}/10")
         print(f"Recommendation: {review.recommendation}")
 
-        if review.feedback:
-            print("\nFeedback:")
+        if review.scores:
+            print("\nSpecialist scores:")
 
-            for item in review.feedback:
-                print(f"- {item}")
+            for area, score in review.scores.items():
+                print(
+                    f"- {area.title()}: "
+                    f"{score:.1f}/10"
+                )
+
+        if review.feedback:
+            print("\nSpecialist feedback:")
+
+            for area, feedback in review.feedback.items():
+                print(
+                    f"- {area.title()}: "
+                    f"{feedback}"
+                )

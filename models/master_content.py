@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from models.review_result import ReviewResult
+from models.editorial_review import EditorialReview
 
 
 @dataclass
@@ -22,5 +22,5 @@ class MasterContent:
     thumbnail_prompt: str = ""
     voiceover_prompt: str = ""
 
-    # Quality review
-    review: Optional[ReviewResult] = None
+    # Editorial review
+    review: Optional[EditorialReview] = None

@@ -23,8 +23,8 @@ class RetryManager:
             print("No retry action available.")
             return content
 
-        print("Running quality review again...")
+        print("Running editorial review again...")
 
-        content.review = pipeline.quality_agent.run(content)
+        content.review = pipeline.editorial_board.review(content)
 
         return content
