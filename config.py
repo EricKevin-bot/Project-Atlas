@@ -7,7 +7,7 @@ Project Atlas configuration.
 # ==========================================
 
 APP_NAME = "Project Atlas"
-ATLAS_VERSION = "0.7.0"
+ATLAS_VERSION = "0.8.0"
 
 # ==========================================
 # Runtime

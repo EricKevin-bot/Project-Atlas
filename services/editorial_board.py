@@ -53,6 +53,8 @@ class EditorialBoard(BaseAgent):
             },
         )
 
+       
+
         self.log(
             f"Editorial review complete — "
             f"{review.overall_score:.1f}/10"
