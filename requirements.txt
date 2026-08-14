@@ -1,2 +1,2 @@
 anthropic
-python-dotenv
+python-dotenvpytest==8.4.2

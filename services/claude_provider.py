@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import anthropic
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
@@ -28,16 +29,41 @@ class ClaudeProvider:
         if not prompt.strip():
             raise ValueError("Prompt cannot be empty.")
 
-        response = self.client.messages.create(
-            model=self.model,
-            max_tokens=max_tokens,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-        )
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=max_tokens,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    }
+                ],
+            )
+
+        except anthropic.AuthenticationError as error:
+            raise RuntimeError(
+                "Claude authentication failed. "
+                "Check your ANTHROPIC_API_KEY."
+            ) from error
+
+        except anthropic.RateLimitError as error:
+            raise RuntimeError(
+                "Claude rate limit reached. "
+                "Please wait and try again."
+            ) from error
+
+        except anthropic.APIConnectionError as error:
+            raise RuntimeError(
+                "Atlas could not connect to Claude. "
+                "Check your internet connection."
+            ) from error
+
+        except anthropic.APIStatusError as error:
+            raise RuntimeError(
+                f"Claude API error "
+                f"(HTTP {error.status_code})."
+            ) from error
 
         text_parts = [
             block.text
