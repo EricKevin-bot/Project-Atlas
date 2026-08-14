@@ -7,14 +7,14 @@ Project Atlas configuration.
 # ==========================================
 
 APP_NAME = "Project Atlas"
-ATLAS_VERSION = "0.8.0"
+ATLAS_VERSION = "1.0.0"
 
 # ==========================================
 # Runtime
 # ==========================================
 
 DEVELOPMENT_MODE = True
-DEBUG_MODE = True
+DEBUG_MODE = True   
 LOGGING_ENABLED = True
 
 # ==========================================
