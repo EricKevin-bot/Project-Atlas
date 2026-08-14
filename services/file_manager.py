@@ -13,6 +13,7 @@ class FileManager:
         script: str,
         description: str,
         tags: List[str],
+        thumbnail_prompt: str = "",
     ) -> Path:
         safe_title = "".join(
             character.lower() if character.isalnum() else "-"
@@ -29,6 +30,10 @@ class FileManager:
 TITLE
 -----
 {title}
+
+THUMBNAIL BRIEF
+---------------
+{thumbnail_prompt}
 
 DESCRIPTION
 -----------

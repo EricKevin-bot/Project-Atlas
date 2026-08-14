@@ -13,6 +13,7 @@ class EditorialBoard(BaseAgent):
             "editorial_board",
             topic=content.topic,
             title=content.title,
+            thumbnail_prompt=content.thumbnail_prompt,
             script=content.script,
             description=content.description,
             tags=", ".join(content.tags),
@@ -20,7 +21,7 @@ class EditorialBoard(BaseAgent):
 
         response = self.ai.generate(
             prompt=prompt,
-            max_tokens=900,
+            max_tokens=1000,
         )
 
         cleaned_response = (
@@ -39,7 +40,9 @@ class EditorialBoard(BaseAgent):
 
         review = EditorialReview(
             approved=bool(data.get("approved", False)),
-            overall_score=float(data.get("overall_score", 0.0)),
+            overall_score=float(
+                data.get("overall_score", 0.0)
+            ),
             recommendation=str(
                 data.get("recommendation", "human_review")
             ),
@@ -52,8 +55,6 @@ class EditorialBoard(BaseAgent):
                 for key, value in data.get("feedback", {}).items()
             },
         )
-
-       
 
         self.log(
             f"Editorial review complete — "

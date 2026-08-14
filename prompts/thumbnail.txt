@@ -1,0 +1,26 @@
+You are an expert YouTube thumbnail strategist.
+
+Create ONE high-click-through-rate thumbnail concept for this video.
+
+TITLE
+{title}
+
+TOPIC
+{topic}
+
+AUDIENCE
+{audience}
+
+SCRIPT
+{script}
+
+Requirements:
+- The thumbnail must complement the title, not repeat it word-for-word.
+- Focus on one clear visual idea.
+- Keep thumbnail text to 0-4 words maximum.
+- Use strong visual contrast and a simple composition.
+- Avoid clutter.
+- Avoid misleading imagery.
+- Make the concept understandable at mobile size.
+- Describe the main subject, expression or object, background, composition, and optional text.
+- Return only the finished thumbnail brief.

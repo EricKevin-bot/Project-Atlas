@@ -16,6 +16,9 @@ class RetryManager:
         elif recommendation == "improve_tags":
             pipeline.tags_agent.run(content)
 
+        elif recommendation == "improve_thumbnail":
+            pipeline.thumbnail_agent.run(content)
+
         elif recommendation == "regenerate_research":
             pipeline.research_agent.run(content)
 

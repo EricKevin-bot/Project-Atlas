@@ -5,6 +5,7 @@ from agents.description_agent import DescriptionAgent
 from agents.research_agent import ResearchAgent
 from agents.script_agent import ScriptAgent
 from agents.tags_agent import TagsAgent
+from agents.thumbnail_agent import ThumbnailAgent
 from agents.title_agent import TitleAgent
 from config import MAX_RETRIES, RETRY_FAILED_AGENTS
 from models.master_content import MasterContent
@@ -21,6 +22,7 @@ class ContentPipeline:
         self.research_agent = ResearchAgent()
         self.title_agent = TitleAgent()
         self.script_agent = ScriptAgent()
+        self.thumbnail_agent = ThumbnailAgent()
         self.description_agent = DescriptionAgent()
         self.tags_agent = TagsAgent()
 
@@ -59,6 +61,7 @@ class ContentPipeline:
         production_agents = [
             self.title_agent,
             self.script_agent,
+            self.thumbnail_agent,
             self.description_agent,
             self.tags_agent,
         ]
@@ -101,7 +104,9 @@ class ContentPipeline:
 
         # Final editorial gate
         if not content.review.approved:
-            print("\n❌ Editorial Board rejected this content package.")
+            print(
+                "\n❌ Editorial Board rejected this content package."
+            )
             print(
                 f"Recommendation: "
                 f"{content.review.recommendation}"
@@ -143,6 +148,10 @@ class ContentPipeline:
         print("=" * 40)
 
         print(f"\n🎬 TITLE\n{content.title}")
+        print(
+            f"\n🖼️ THUMBNAIL BRIEF\n"
+            f"{content.thumbnail_prompt}"
+        )
         print(f"\n📝 DESCRIPTION\n{content.description}")
         print(f"\n🏷️ TAGS\n{', '.join(content.tags)}")
         print(f"\n📄 SCRIPT\n{content.script}")
@@ -161,9 +170,18 @@ class ContentPipeline:
         print("🧪 EDITORIAL BOARD REPORT")
         print("=" * 40)
 
-        print(f"\nApproved: {'Yes' if review.approved else 'No'}")
-        print(f"Overall score: {review.overall_score:.1f}/10")
-        print(f"Recommendation: {review.recommendation}")
+        print(
+            f"\nApproved: "
+            f"{'Yes' if review.approved else 'No'}"
+        )
+        print(
+            f"Overall score: "
+            f"{review.overall_score:.1f}/10"
+        )
+        print(
+            f"Recommendation: "
+            f"{review.recommendation}"
+        )
 
         if review.scores:
             print("\nSpecialist scores:")
