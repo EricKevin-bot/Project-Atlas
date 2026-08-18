@@ -7,6 +7,7 @@ from agents.script_agent import ScriptAgent
 from agents.tags_agent import TagsAgent
 from agents.thumbnail_agent import ThumbnailAgent
 from agents.title_agent import TitleAgent
+from agents.voiceover_agent import VoiceoverAgent
 from config import (
     GENERATE_THUMBNAIL_IMAGE,
     MAX_RETRIES,
@@ -17,6 +18,7 @@ from services.editorial_board import EditorialBoard
 from services.file_manager import FileManager
 from services.retry_manager import RetryManager
 from services.thumbnail_renderer import ThumbnailRenderer
+from services.voiceover_renderer import VoiceoverRenderer
 
 
 PipelineResult = Tuple[MasterContent, Optional[Path], str]
@@ -27,6 +29,7 @@ class ContentPipeline:
         self.research_agent = ResearchAgent()
         self.title_agent = TitleAgent()
         self.script_agent = ScriptAgent()
+        self.voiceover_agent = VoiceoverAgent()
         self.thumbnail_agent = ThumbnailAgent()
         self.description_agent = DescriptionAgent()
         self.tags_agent = TagsAgent()
@@ -34,7 +37,9 @@ class ContentPipeline:
         self.editorial_board = EditorialBoard()
         self.file_manager = FileManager()
         self.retry_manager = RetryManager()
+
         self.thumbnail_renderer = ThumbnailRenderer()
+        self.voiceover_renderer = VoiceoverRenderer()
 
     def run(self) -> PipelineResult:
         print("\n🚀 Starting Content Pipeline...\n")
@@ -66,6 +71,7 @@ class ContentPipeline:
         production_agents = [
             self.title_agent,
             self.script_agent,
+            self.voiceover_agent,
             self.thumbnail_agent,
             self.description_agent,
             self.tags_agent,
@@ -127,9 +133,21 @@ class ContentPipeline:
 
             return content, None, "EDITORIAL_REJECTED"
 
+        # Voiceover rendering is optional.
+        try:
+            self.voiceover_renderer.render(content)
+
+        except Exception as error:
+            content.voiceover_audio_path = ""
+
+            print("\n⚠️ Voiceover rendering failed.")
+            print(f"Reason: {error}")
+            print(
+                "Atlas will continue and export the "
+                "approved content package."
+            )
+
         # Thumbnail rendering is optional.
-        # A rendering/provider failure must not destroy an
-        # otherwise approved content package.
         if GENERATE_THUMBNAIL_IMAGE:
             try:
                 self.thumbnail_renderer.render(content)
@@ -144,8 +162,7 @@ class ContentPipeline:
                     "approved content package."
                 )
 
-        # Export approved package regardless of thumbnail
-        # rendering success.
+        # Export approved package regardless of media failures.
         output_path = self.file_manager.save_content(
             title=content.title,
             script=content.script,
@@ -159,6 +176,17 @@ class ContentPipeline:
         if retry_count:
             print(
                 f"🔄 Approved after {retry_count} targeted retry."
+            )
+
+        if content.voiceover_audio_path:
+            print(
+                f"🎙️ Voiceover audio: "
+                f"{content.voiceover_audio_path}"
+            )
+        else:
+            print(
+                "⚠️ Content exported without rendered "
+                "voiceover audio."
             )
 
         if content.thumbnail_image_path:
@@ -183,6 +211,11 @@ class ContentPipeline:
         print("=" * 40)
 
         print(f"\n🎬 TITLE\n{content.title}")
+
+        print(
+            f"\n🎙️ VOICEOVER SCRIPT\n"
+            f"{content.voiceover_prompt}"
+        )
 
         print(
             f"\n🖼️ THUMBNAIL BRIEF\n"

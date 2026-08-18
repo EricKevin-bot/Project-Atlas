@@ -24,8 +24,9 @@ class MasterContent:
     thumbnail_prompt: str = ""
     thumbnail_image_path: str = ""
 
-    # Future media assets
+    # Voiceover
     voiceover_prompt: str = ""
+    voiceover_audio_path: str = ""
 
     # Editorial review
     review: Optional[EditorialReview] = None

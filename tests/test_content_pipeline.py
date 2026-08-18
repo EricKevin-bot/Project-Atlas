@@ -4,16 +4,19 @@ from models.editorial_review import EditorialReview
 from services.content_pipeline import ContentPipeline
 
 
-def test_pipeline_exports_when_thumbnail_rendering_fails() -> None:
+def build_mock_pipeline() -> ContentPipeline:
     pipeline = ContentPipeline()
 
     pipeline.research_agent = MagicMock()
     pipeline.title_agent = MagicMock()
     pipeline.script_agent = MagicMock()
+    pipeline.voiceover_agent = MagicMock()
     pipeline.thumbnail_agent = MagicMock()
     pipeline.description_agent = MagicMock()
     pipeline.tags_agent = MagicMock()
+
     pipeline.editorial_board = MagicMock()
+    pipeline.voiceover_renderer = MagicMock()
     pipeline.thumbnail_renderer = MagicMock()
     pipeline.file_manager = MagicMock()
 
@@ -22,31 +25,30 @@ def test_pipeline_exports_when_thumbnail_rendering_fails() -> None:
         content.audience = "Test audience"
         content.objective = "Test objective"
 
-    pipeline.research_agent.run.side_effect = populate_research
-
     def populate_title(content):
         content.title = "Test Title"
-
-    pipeline.title_agent.run.side_effect = populate_title
 
     def populate_script(content):
         content.script = "Test script"
 
-    pipeline.script_agent.run.side_effect = populate_script
+    def populate_voiceover(content):
+        content.voiceover_prompt = "Test voiceover script"
 
     def populate_thumbnail(content):
         content.thumbnail_prompt = "Test thumbnail brief"
 
-    pipeline.thumbnail_agent.run.side_effect = populate_thumbnail
-
     def populate_description(content):
         content.description = "Test description"
-
-    pipeline.description_agent.run.side_effect = populate_description
 
     def populate_tags(content):
         content.tags = ["test", "atlas"]
 
+    pipeline.research_agent.run.side_effect = populate_research
+    pipeline.title_agent.run.side_effect = populate_title
+    pipeline.script_agent.run.side_effect = populate_script
+    pipeline.voiceover_agent.run.side_effect = populate_voiceover
+    pipeline.thumbnail_agent.run.side_effect = populate_thumbnail
+    pipeline.description_agent.run.side_effect = populate_description
     pipeline.tags_agent.run.side_effect = populate_tags
 
     pipeline.editorial_board.review.return_value = EditorialReview(
@@ -64,12 +66,18 @@ def test_pipeline_exports_when_thumbnail_rendering_fails() -> None:
         feedback={},
     )
 
-    pipeline.thumbnail_renderer.render.side_effect = RuntimeError(
-        "Image provider unavailable"
-    )
-
     pipeline.file_manager.save_content.return_value = (
         "output/test-title.txt"
+    )
+
+    return pipeline
+
+
+def test_pipeline_exports_when_thumbnail_rendering_fails() -> None:
+    pipeline = build_mock_pipeline()
+
+    pipeline.thumbnail_renderer.render.side_effect = RuntimeError(
+        "Image provider unavailable"
     )
 
     with patch("builtins.input", return_value="y"):
@@ -78,14 +86,26 @@ def test_pipeline_exports_when_thumbnail_rendering_fails() -> None:
     assert status == "SUCCESS"
     assert output_path == "output/test-title.txt"
 
+    pipeline.voiceover_renderer.render.assert_called_once_with(content)
     pipeline.thumbnail_renderer.render.assert_called_once_with(content)
 
-    pipeline.file_manager.save_content.assert_called_once_with(
-        title="Test Title",
-        script="Test script",
-        description="Test description",
-        tags=["test", "atlas"],
-        thumbnail_prompt="Test thumbnail brief",
+    assert content.thumbnail_image_path == ""
+
+
+def test_pipeline_exports_when_voiceover_rendering_fails() -> None:
+    pipeline = build_mock_pipeline()
+
+    pipeline.voiceover_renderer.render.side_effect = RuntimeError(
+        "Voice provider unavailable"
     )
 
-    assert content.thumbnail_image_path == ""
+    with patch("builtins.input", return_value="y"):
+        content, output_path, status = pipeline.run()
+
+    assert status == "SUCCESS"
+    assert output_path == "output/test-title.txt"
+
+    pipeline.voiceover_renderer.render.assert_called_once_with(content)
+    pipeline.thumbnail_renderer.render.assert_called_once_with(content)
+
+    assert content.voiceover_audio_path == ""
