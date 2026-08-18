@@ -19,7 +19,12 @@ class MasterContent:
     script: str = ""
     description: str = ""
     tags: List[str] = field(default_factory=list)
+
+    # Thumbnail
     thumbnail_prompt: str = ""
+    thumbnail_image_path: str = ""
+
+    # Future media assets
     voiceover_prompt: str = ""
 
     # Editorial review

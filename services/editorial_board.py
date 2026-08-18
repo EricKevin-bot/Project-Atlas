@@ -21,7 +21,7 @@ class EditorialBoard(BaseAgent):
 
         response = self.ai.generate(
             prompt=prompt,
-            max_tokens=1000,
+            max_tokens=1800,
         )
 
         cleaned_response = (

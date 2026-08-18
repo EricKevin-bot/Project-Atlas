@@ -7,14 +7,14 @@ Project Atlas configuration.
 # ==========================================
 
 APP_NAME = "Project Atlas"
-ATLAS_VERSION = "1.0.0"
+ATLAS_VERSION = "1.2.0"
 
 # ==========================================
 # Runtime
 # ==========================================
 
 DEVELOPMENT_MODE = True
-DEBUG_MODE = True   
+DEBUG_MODE = True
 LOGGING_ENABLED = True
 
 # ==========================================
@@ -23,6 +23,18 @@ LOGGING_ENABLED = True
 
 AI_PROVIDER = "anthropic"
 CLAUDE_MODEL = "claude-sonnet-4-6"
+
+# ==========================================
+# Image Provider
+# ==========================================
+
+IMAGE_PROVIDER = "openai"
+IMAGE_MODEL = "gpt-image-1-mini"
+IMAGE_QUALITY = "low"
+IMAGE_SIZE = "1536x1024"
+IMAGE_FORMAT = "png"
+IMAGE_COUNT = 1
+GENERATE_THUMBNAIL_IMAGE = True
 
 # ==========================================
 # Token Limits

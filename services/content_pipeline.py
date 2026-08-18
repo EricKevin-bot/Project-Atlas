@@ -7,11 +7,16 @@ from agents.script_agent import ScriptAgent
 from agents.tags_agent import TagsAgent
 from agents.thumbnail_agent import ThumbnailAgent
 from agents.title_agent import TitleAgent
-from config import MAX_RETRIES, RETRY_FAILED_AGENTS
+from config import (
+    GENERATE_THUMBNAIL_IMAGE,
+    MAX_RETRIES,
+    RETRY_FAILED_AGENTS,
+)
 from models.master_content import MasterContent
 from services.editorial_board import EditorialBoard
 from services.file_manager import FileManager
 from services.retry_manager import RetryManager
+from services.thumbnail_renderer import ThumbnailRenderer
 
 
 PipelineResult = Tuple[MasterContent, Optional[Path], str]
@@ -27,9 +32,9 @@ class ContentPipeline:
         self.tags_agent = TagsAgent()
 
         self.editorial_board = EditorialBoard()
-
         self.file_manager = FileManager()
         self.retry_manager = RetryManager()
+        self.thumbnail_renderer = ThumbnailRenderer()
 
     def run(self) -> PipelineResult:
         print("\n🚀 Starting Content Pipeline...\n")
@@ -122,12 +127,31 @@ class ContentPipeline:
 
             return content, None, "EDITORIAL_REJECTED"
 
-        # Export approved package
+        # Thumbnail rendering is optional.
+        # A rendering/provider failure must not destroy an
+        # otherwise approved content package.
+        if GENERATE_THUMBNAIL_IMAGE:
+            try:
+                self.thumbnail_renderer.render(content)
+
+            except Exception as error:
+                content.thumbnail_image_path = ""
+
+                print("\n⚠️ Thumbnail rendering failed.")
+                print(f"Reason: {error}")
+                print(
+                    "Atlas will continue and export the "
+                    "approved content package."
+                )
+
+        # Export approved package regardless of thumbnail
+        # rendering success.
         output_path = self.file_manager.save_content(
             title=content.title,
             script=content.script,
             description=content.description,
             tags=content.tags,
+            thumbnail_prompt=content.thumbnail_prompt,
         )
 
         print("\n✅ Pipeline complete.")
@@ -135,6 +159,17 @@ class ContentPipeline:
         if retry_count:
             print(
                 f"🔄 Approved after {retry_count} targeted retry."
+            )
+
+        if content.thumbnail_image_path:
+            print(
+                f"🖼️ Thumbnail image: "
+                f"{content.thumbnail_image_path}"
+            )
+        elif GENERATE_THUMBNAIL_IMAGE:
+            print(
+                "⚠️ Content exported without a rendered "
+                "thumbnail image."
             )
 
         return content, output_path, "SUCCESS"
@@ -148,10 +183,12 @@ class ContentPipeline:
         print("=" * 40)
 
         print(f"\n🎬 TITLE\n{content.title}")
+
         print(
             f"\n🖼️ THUMBNAIL BRIEF\n"
             f"{content.thumbnail_prompt}"
         )
+
         print(f"\n📝 DESCRIPTION\n{content.description}")
         print(f"\n🏷️ TAGS\n{', '.join(content.tags)}")
         print(f"\n📄 SCRIPT\n{content.script}")
@@ -174,10 +211,12 @@ class ContentPipeline:
             f"\nApproved: "
             f"{'Yes' if review.approved else 'No'}"
         )
+
         print(
             f"Overall score: "
             f"{review.overall_score:.1f}/10"
         )
+
         print(
             f"Recommendation: "
             f"{review.recommendation}"
